@@ -7,9 +7,9 @@ const DOMINIO_EMAIL = '@unibrasilia.com.br';
 
 // ===========================================================
 
-const fs = require('fs')
+import { readFile, writeFile } from 'fs';
 
-fs.readFile('listaNomeCompleto.txt', (err, data) => {
+readFile('listaNomeCompleto.txt', (err, data) => {
     if (err) throw err;
 
     var listaEmails = converteNomeEmail(data.toString());
@@ -48,7 +48,7 @@ function gravarArquivo(listaEmails) {
 
     var emailsGerado = listaEmails.join(',').replace(/,/g, '\n');
 
-    fs.writeFile("listaEmails.txt", emailsGerado, (erro) => {
+    writeFile("listaEmails.txt", emailsGerado, (erro) => {
         if (erro) throw erro;
 
         console.log("listaEmails.txt salvo com sucesso.");
