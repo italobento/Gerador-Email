@@ -1,3 +1,5 @@
+'use strict';
+
 /************************************************************
 *                                                           *
 *        MEXER SOMENTE NA VARIÁVEL DOMINIO EMAIL            *
@@ -7,22 +9,20 @@ const DOMINIO_EMAIL = '@unibrasilia.com.br';
 
 // ===========================================================
 
-import { readFile, writeFile } from 'fs';
+// ===== Módulos =====
+const fs = require('fs');
+const capitalize = require('capitalize-pt-br')
+// ===================
 
-readFile('listaNomeCompleto.txt', (err, data) => {
-    if (err) throw err;
-
-    var listaEmails = converteNomeEmail(data.toString());
-    gravarArquivo(listaEmails);
-})
+iniciar();
 
 function converteNomeEmail(listaNomes) {
 
-    var linhas = listaNomes.split(/\r?\n/);
-    var listaEmails = [];
-    var email = '';
-    var primeiroNome = '';
-    var ultimoNome = '';
+    let linhas = listaNomes.split(/\r?\n/);
+    let listaEmails = [];
+    let email = '';
+    let primeiroNome = '';
+    let ultimoNome = '';
 
     linhas.forEach((linha) => {
 
@@ -44,20 +44,76 @@ function converteNomeEmail(listaNomes) {
     return listaEmails;
 }
 
-function gravarArquivo(listaEmails) {
+function gravarArquivo(listaEmails, caminhoSaida) {
 
-    var emailsGerado = listaEmails.join(',').replace(/,/g, '\n');
+    let emailsGerado = listaEmails.join(',').replace(/,/g, '\n');
 
-    writeFile("listaEmails.txt", emailsGerado, (erro) => {
+    fs.writeFile(caminhoSaida, emailsGerado, (erro) => {
         if (erro) throw erro;
 
-        console.log("listaEmails.txt salvo com sucesso.");
+        console.log(caminhoSaida + ' salvo com sucesso.');
     });
 }
 
+function iniciar() {
+    fs.readFile('Arquivos/Entrada/listaNomeCompleto.txt', (err, data) => {
+        if (err) throw err;
+
+        let listaEmails = converteNomeEmail(data.toString());
+        let listaPrimeiroNome = obtemPrimeiroNome(data.toString());
+        let listaSobrenome = obtemSobrenome(data.toString());
+
+        gravarArquivo(listaEmails, 'Arquivos/Saída/listaEmails.txt');
+        gravarArquivo(listaPrimeiroNome, 'Arquivos/Saída/listaPrimeiroNome.txt');
+        gravarArquivo(listaSobrenome, 'Arquivos/Saída/listaSobrenome.txt');
+    })
+}
+
+function obtemPrimeiroNome(listaNomes) {
+
+    let linhas = listaNomes.split(/\r?\n/);
+    let listaPrimeiroNome = [];
+    let primeiroNome = '';
+
+    linhas.forEach((linha) => {
+
+        if (linha.trim()) {
+            primeiroNome = capitalize(linha.split(' ').slice(0, 1).join(' '));
+            listaPrimeiroNome.push(primeiroNome);
+        } else {
+            listaPrimeiroNome.push('');
+        }
+
+    })
+
+    return listaPrimeiroNome;
+
+}
+
+function obtemSobrenome(listaNomes) {
+
+    let linhas = listaNomes.split(/\r?\n/);
+    let listaSobrenome = [];
+    let sobrenome = '';
+
+    linhas.forEach((linha) => {
+
+        if (linha.trim()) {
+            sobrenome = capitalize(linha).split(' ').slice(1, linha.length).join(' ');
+            listaSobrenome.push(sobrenome);
+        } else {
+            listaSobrenome.push('');
+        }
+
+    })
+
+    return listaSobrenome;
+
+}
+
 function removerAcentos(newStringComAcento) {
-    var string = newStringComAcento;
-    var mapaAcentosHex = {
+    let string = newStringComAcento;
+    let mapaAcentosHex = {
         a: /[\xE0-\xE6]/g,
         e: /[\xE8-\xEB]/g,
         i: /[\xEC-\xEF]/g,
@@ -67,8 +123,8 @@ function removerAcentos(newStringComAcento) {
         n: /\xF1/g
     };
 
-    for (var letra in mapaAcentosHex) {
-        var expressaoRegular = mapaAcentosHex[letra];
+    for (let letra in mapaAcentosHex) {
+        let expressaoRegular = mapaAcentosHex[letra];
         string = string.replace(expressaoRegular, letra);
     }
 
