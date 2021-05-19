@@ -1,5 +1,3 @@
-'use strict';
-
 /************************************************************
 *                                                           *
 *        MEXER SOMENTE NA VARIÁVEL DOMINIO EMAIL            *
@@ -7,22 +5,31 @@
 *************************************************************/
 const DOMINIO_EMAIL = '@unibrasilia.com.br';
 
-// ===========================================================
 
-// ===== Módulos =====
+/************************************************************
+*                                                           *
+*                       MÓDULOS                             *
+*                                                           *
+*************************************************************/
 const fs = require('fs');
 const capitalize = require('capitalize-pt-br')
-// ===================
+const path = require('path');
 
+
+/************************************************************
+*                                                           *
+*                 EXECUÇÃO DO PROGRAMA                      *
+*                                                           *
+*************************************************************/
 iniciar();
 
 function converteNomeEmail(listaNomes) {
 
     let linhas = listaNomes.split(/\r?\n/);
     let listaEmails = [];
-    let email = '';
-    let primeiroNome = '';
-    let ultimoNome = '';
+    let email;
+    let primeiroNome;
+    let ultimoNome;
 
     linhas.forEach((linha) => {
 
@@ -36,7 +43,7 @@ function converteNomeEmail(listaNomes) {
 
             listaEmails.push(email);
         } else {
-            listaEmails.push('');
+            listaEmails.push();
         }
 
     })
@@ -44,70 +51,62 @@ function converteNomeEmail(listaNomes) {
     return listaEmails;
 }
 
-function gravarArquivo(listaEmails, caminhoSaida) {
+function gravarArquivo(conteudo, caminhoSaida) {
 
-    let emailsGerado = listaEmails.join(',').replace(/,/g, '\n');
+    let conteudoGerado = conteudo ? conteudo.join(',').replace(/,/g, '\n') : '';
+    let diretorioSaida = path.dirname(caminhoSaida);
 
-    fs.writeFile(caminhoSaida, emailsGerado, (erro) => {
-        if (erro) throw erro;
+    if (!fs.existsSync(diretorioSaida)) {
+        fs.mkdirSync(diretorioSaida);
+    }
 
-        console.log(caminhoSaida + ' salvo com sucesso.');
+    fs.writeFile(caminhoSaida, conteudoGerado, (err) => {
+        if (err) throw err;
+
+        console.log(path.basename(caminhoSaida) + ' salvo com sucesso.');
     });
 }
 
 function iniciar() {
-    fs.readFile('Arquivos/Entrada/listaNomeCompleto.txt', (err, data) => {
-        if (err) throw err;
+    let arquivoEntrada = 'Arquivos/Entrada/listaNomeCompleto.txt';
 
-        let listaEmails = converteNomeEmail(data.toString());
-        let listaPrimeiroNome = obtemPrimeiroNome(data.toString());
-        let listaSobrenome = obtemSobrenome(data.toString());
+    fs.readFile(arquivoEntrada, (err, data) => {
+        if (err) {
+            gravarArquivo('', arquivoEntrada);
+        };
 
-        gravarArquivo(listaEmails, 'Arquivos/Saída/listaEmails.txt');
-        gravarArquivo(listaPrimeiroNome, 'Arquivos/Saída/listaPrimeiroNome.txt');
-        gravarArquivo(listaSobrenome, 'Arquivos/Saída/listaSobrenome.txt');
-    })
-}
+        if (data) {
+            let listaEmails = converteNomeEmail(data.toString());
+            let listaPrimeiroNome = obtemNome(data.toString(), 'primeiroNome');
+            let listaSobrenome = obtemNome(data.toString(), 'sobrenome');
 
-function obtemPrimeiroNome(listaNomes) {
-
-    let linhas = listaNomes.split(/\r?\n/);
-    let listaPrimeiroNome = [];
-    let primeiroNome = '';
-
-    linhas.forEach((linha) => {
-
-        if (linha.trim()) {
-            primeiroNome = capitalize(linha.split(' ').slice(0, 1).join(' '));
-            listaPrimeiroNome.push(primeiroNome);
-        } else {
-            listaPrimeiroNome.push('');
+            gravarArquivo(listaEmails, 'Arquivos/Saída/listaEmails.txt');
+            gravarArquivo(listaPrimeiroNome, 'Arquivos/Saída/listaPrimeiroNome.txt');
+            gravarArquivo(listaSobrenome, 'Arquivos/Saída/listaSobrenome.txt');
         }
 
     })
-
-    return listaPrimeiroNome;
-
 }
 
-function obtemSobrenome(listaNomes) {
+function obtemNome(listaNomeCompleto, tipoNome) {
 
-    let linhas = listaNomes.split(/\r?\n/);
-    let listaSobrenome = [];
-    let sobrenome = '';
+    let linhas = listaNomeCompleto.split(/\r?\n/);
+    let listaNomes = [];
+    let nome;
 
     linhas.forEach((linha) => {
 
-        if (linha.trim()) {
-            sobrenome = capitalize(linha).split(' ').slice(1, linha.length).join(' ');
-            listaSobrenome.push(sobrenome);
+        if (tipoNome === 'primeiroNome') {
+            nome = capitalize(linha).split(' ').slice(0, 1).join(' ');
         } else {
-            listaSobrenome.push('');
+            nome = capitalize(linha).split(' ').slice(1, linha.length).join(' ');
         }
+
+        listaNomes.push(nome.trim());
 
     })
 
-    return listaSobrenome;
+    return listaNomes;
 
 }
 
