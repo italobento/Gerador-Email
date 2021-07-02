@@ -3,7 +3,7 @@
 *        MEXER SOMENTE NA VARIÁVEL DOMINIO EMAIL            *
 *                                                           *
 *************************************************************/
-const DOMINIO_EMAIL = '@unibrasilia.com.br';
+const DOMINIO_EMAIL = '.aluno@email.com';
 
 
 /************************************************************
@@ -14,6 +14,7 @@ const DOMINIO_EMAIL = '@unibrasilia.com.br';
 import fs from 'fs';
 import capitalize from 'capitalize-pt-br';
 import path from 'path';
+import preposicoes from './preposicoes.js';
 
 
 /************************************************************
@@ -25,23 +26,25 @@ iniciar();
 
 function converteNomeEmail(listaNomes) {
 
+    const ARQUIVO_BASE_DADOS = 'Arquivos/Entrada/baseDadosEmail.txt';
+    let baseDadosEmail = fs.readFileSync(ARQUIVO_BASE_DADOS, { encoding: 'utf8' }, (err, data) => {
+        if (err) throw err;
+        if (data) return data;
+    });
+
+    baseDadosEmail = baseDadosEmail.split(/\r?\n/);
+
     let linhas = listaNomes.split(/\r?\n/);
     let listaEmails = [];
-    let email;
-    let primeiroNome;
-    let ultimoNome;
 
     linhas.forEach(linha => {
 
         if (linha.trim()) {
             linha = linha.toLowerCase();
-            primeiroNome = obtemPrimeiroNome(linha);
-            ultimoNome = obtemUltimoNome(linha);
 
-            email = primeiroNome + '.' + ultimoNome + DOMINIO_EMAIL;
-            email = removerAcentos(email);
-
+            let email = gerarNovoEmail(linha, [...baseDadosEmail, ...listaEmails]);
             listaEmails.push(email);
+
         } else {
             listaEmails.push('');
         }
@@ -49,6 +52,72 @@ function converteNomeEmail(listaNomes) {
     })
 
     return listaEmails;
+}
+
+function gerarNovoEmail(nomeCompleto, listaEmails) {
+    let nome = nomeCompleto.split(' ');
+    nome = nome.filter(nome => !preposicoes.includes(nome));
+
+    let email;
+    let flag;
+    let tentativa = 1;
+
+    do {
+
+        flag = false;
+
+        switch (tentativa) {
+            case 1:
+                if (nome.length >= 2)
+                    email = nome[0] + '.' + nome[nome.length - 1] + DOMINIO_EMAIL;
+                break;
+            case 2:
+                if (nome.length >= 3)
+                    email = nome[0] + '.' + nome[nome.length - 2] + DOMINIO_EMAIL;
+                break;
+            case 3:
+                if (nome.length >= 4)
+                    email = nome[0] + '.' + nome[nome.length - 3] + DOMINIO_EMAIL;
+                break;
+            case 4:
+                if (nome.length >= 4)
+                    email = nome[0] + nome[nome.length - 3] + '.' + nome[nome.length - 1] + DOMINIO_EMAIL;
+                break;
+            case 5:
+                if (nome.length >= 4)
+                    email = nome[0] + nome[nome.length - 3] + '.' + nome[nome.length - 2] + DOMINIO_EMAIL;
+                break;
+            case 6:
+                if (nome.length >= 4)
+                    email = nome[0] + '.' + nome[nome.length - 3].charAt(0) + nome[nome.length - 1] + DOMINIO_EMAIL;
+                break;
+            case 7:
+                if (nome.length >= 4)
+                    email = nome[0] + '.' + nome[nome.length - 3].charAt(0) + nome[nome.length - 2] + DOMINIO_EMAIL;
+                break;
+            case 8:
+                if (nome.length >= 4)
+                    email = nome[0] + nome[nome.length - 3].charAt(0) + '.' + nome[nome.length - 1] + DOMINIO_EMAIL;
+                break;
+            case 9:
+                if (nome.length >= 4)
+                    email = nome[0] + nome[nome.length - 3].charAt(0) + '.' + nome[nome.length - 2] + DOMINIO_EMAIL;
+                break;
+            default:
+                email = '**********' + DOMINIO_EMAIL;
+                break;
+        }
+
+        email = removerAcentos(email);
+
+        if (validarEmailExistente(email, listaEmails) && tentativa <= 9) {
+            flag = true;
+            tentativa++;
+        }
+
+    } while (flag);
+
+    return email;
 }
 
 function gravarArquivo(conteudo, caminhoSaida) {
@@ -68,17 +137,18 @@ function gravarArquivo(conteudo, caminhoSaida) {
 }
 
 function iniciar() {
-    let arquivoEntrada = 'Arquivos/Entrada/listaNomeCompleto.txt';
+    const ARQUIVO_ENTRADA = 'Arquivos/Entrada/listaNomeCompleto.txt';
 
-    fs.readFile(arquivoEntrada, (err, data) => {
+    fs.readFile(ARQUIVO_ENTRADA, { encoding: 'utf8' }, (err, data) => {
         if (err) {
-            gravarArquivo('', arquivoEntrada);
+            gravarArquivo('', ARQUIVO_ENTRADA);
         };
 
         if (data) {
-            let listaEmails = converteNomeEmail(data.toString());
-            let listaPrimeiroNome = obtemNome(data.toString(), 'primeiroNome');
-            let listaSobrenome = obtemNome(data.toString(), 'sobrenome');
+
+            let listaEmails = converteNomeEmail(data);
+            let listaPrimeiroNome = obtemNome(data, 'primeiroNome');
+            let listaSobrenome = obtemNome(data, 'sobrenome');
 
             gravarArquivo(listaEmails, 'Arquivos/Saída/listaEmails.txt');
             gravarArquivo(listaPrimeiroNome, 'Arquivos/Saída/listaPrimeiroNome.txt');
@@ -92,11 +162,10 @@ function obtemNome(listaNomeCompleto, tipoNome) {
 
     let linhas = listaNomeCompleto.split(/\r?\n/);
     let listaNomes = [];
-    let nome;
 
     linhas.forEach(linha => {
 
-        nome = capitalize(linha);
+        let nome = capitalize(linha);
 
         if (tipoNome === 'primeiroNome') {
             nome = obtemPrimeiroNome(nome);
@@ -120,10 +189,6 @@ function obtemSobrenome(nomeCompleto) {
     return nomeCompleto.split(' ').slice(1, nomeCompleto.length).join(' ');
 }
 
-function obtemUltimoNome(nomeCompleto) {
-    return nomeCompleto.split(' ').slice(-1).join(' ');
-}
-
 function removerAcentos(newStringComAcento) {
     let string = newStringComAcento;
     let mapaAcentosHex = {
@@ -142,4 +207,8 @@ function removerAcentos(newStringComAcento) {
     }
 
     return string;
+}
+
+function validarEmailExistente(email, listaEmailsExistentes) {
+    return listaEmailsExistentes.includes(email);
 }
