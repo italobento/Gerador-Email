@@ -1,11 +1,15 @@
 {
   "name": "gerador_email",
-  "version": "1.0.0",
-  "description": "Gerar E-mail com primeiro e último nome da pessoa",
+  "version": "1.0.1",
+  "type": "module",
+  "description": "Gerador de E-mail baseado no nome completo da pessoa.",
   "main": "geradorEmail.js",
   "author": "Italo Araujo",
   "license": "ISC",
+  "scripts": {
+    "start": "node geradorEmail.js"
+  },
   "dependencies": {
-    "capitalize-pt-br": "^0.6.0"
+    "capitalize-pt-br": "^0,.6.0"
   }
 }

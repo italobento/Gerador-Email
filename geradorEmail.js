@@ -11,9 +11,9 @@ const DOMINIO_EMAIL = '@unibrasilia.com.br';
 *                       MÓDULOS                             *
 *                                                           *
 *************************************************************/
-const fs = require('fs');
-const capitalize = require('capitalize-pt-br')
-const path = require('path');
+import fs from 'fs';
+import capitalize from 'capitalize-pt-br';
+import path from 'path';
 
 
 /************************************************************
@@ -31,19 +31,19 @@ function converteNomeEmail(listaNomes) {
     let primeiroNome;
     let ultimoNome;
 
-    linhas.forEach((linha) => {
+    linhas.forEach(linha => {
 
         if (linha.trim()) {
             linha = linha.toLowerCase();
-            primeiroNome = linha.split(' ').slice(0, 1).join(' ');
-            ultimoNome = linha.split(' ').slice(-1).join(' ');
+            primeiroNome = obtemPrimeiroNome(linha);
+            ultimoNome = obtemUltimoNome(linha);
 
             email = primeiroNome + '.' + ultimoNome + DOMINIO_EMAIL;
             email = removerAcentos(email);
 
             listaEmails.push(email);
         } else {
-            listaEmails.push();
+            listaEmails.push('');
         }
 
     })
@@ -94,12 +94,14 @@ function obtemNome(listaNomeCompleto, tipoNome) {
     let listaNomes = [];
     let nome;
 
-    linhas.forEach((linha) => {
+    linhas.forEach(linha => {
+
+        nome = capitalize(linha);
 
         if (tipoNome === 'primeiroNome') {
-            nome = capitalize(linha).split(' ').slice(0, 1).join(' ');
+            nome = obtemPrimeiroNome(nome);
         } else {
-            nome = capitalize(linha).split(' ').slice(1, linha.length).join(' ');
+            nome = obtemSobrenome(nome);
         }
 
         listaNomes.push(nome.trim());
@@ -108,6 +110,18 @@ function obtemNome(listaNomeCompleto, tipoNome) {
 
     return listaNomes;
 
+}
+
+function obtemPrimeiroNome(nomeCompleto) {
+    return nomeCompleto.split(' ').slice(0, 1).join(' ');
+}
+
+function obtemSobrenome(nomeCompleto) {
+    return nomeCompleto.split(' ').slice(1, nomeCompleto.length).join(' ');
+}
+
+function obtemUltimoNome(nomeCompleto) {
+    return nomeCompleto.split(' ').slice(-1).join(' ');
 }
 
 function removerAcentos(newStringComAcento) {
