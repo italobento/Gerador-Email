@@ -1,15 +1,15 @@
 #### Como usar
 
-1. Baixar e instalar NodeJs:
-> [NodeJs](https://nodejs.org/en/ "NodeJs")
+1. Baixar e instalar [NodeJs](https://nodejs.org/en/ "NodeJs")
 
-2. Adicionar lista de nomes completo no arquivo **listaNomeCompleto.txt**.(Conforme exemplo do arquivo).
-3. Adicionar e-mails já existenes no arquivo **baseDadosEmail.txt**. (Conforme exemplo do arquivo).
+2. Adicionar lista de nomes completo no arquivo **listaNomeCompleto.txt**. (Conforme exemplo do arquivo).
 
-3. O arquivo suporta nomes maiúsculos e com acentuação.
+3. Adicionar e-mails já existentes no arquivo **baseDadosEmail.txt**. (Conforme exemplo do arquivo).
 
-4. Caso deseje alterar o domínio do E-mail, alterar a linha 6 do arquivo **geradorEmail.js**.
+4. O arquivo suporta nomes maiúsculos e com acentuação.
 
-5. Para PRIMEIRA execução do script, abrir o TERMINAL e digitar `npm install`
+5. Caso deseje alterar o domínio do E-mail, alterar a linha 6 do arquivo **geradorEmail.js**.
 
-6. Nas próximas vezes, executar o comando no TERMINAL `npm start`
+6. Para **_PRIMEIRA_** execução do script, abrir o **_TERMINAL_** e digitar `npm install`
+
+7. Nas próximas vezes, executar o comando no **_TERMINAL_** `npm start`
