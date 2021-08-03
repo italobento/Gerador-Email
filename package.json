@@ -10,6 +10,6 @@
     "start": "node geradorEmail.js"
   },
   "dependencies": {
-    "capitalize-pt-br": "^0,.6.0"
+    "capitalize-pt-br": "^0.6.0"
   }
 }
